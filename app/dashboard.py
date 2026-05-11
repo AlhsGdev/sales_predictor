@@ -1,43 +1,25 @@
 import streamlit as st
-import pandas as pd
-import joblib
-import os
 
-# Charger modèle
-model_path = os.path.join("models", "sales_prediction.pkl")
-model = joblib.load(model_path) 
+st.title("Sales Prediction App")
 
-st.title("📊 Sales Prediction App")
+# INPUT utilisateur
+prix = st.text_input("Prix (ex: 1 500 000)")
+quantite = st.text_input("Quantité")
+cout = st.text_input("Coût")
 
-# Choix du mode
-mode = st.radio("Choisir une option :", ["Importer CSV", "Saisie manuelle"])
+# CONVERSION en float propre
+def clean_number(value):
+    return float(value.replace(" ", "").replace(",", "."))
 
-# =========================
-# 🟢 MODE 1 : CSV
-# =========================
-if mode == "Importer CSV":
-    file = st.file_uploader("Importer votre fichier CSV", type=["csv"])
+if st.button("Predict"):
+    try:
+        prix = clean_number(prix)
+        quantite = clean_number(quantite)
+        cout = clean_number(cout)
 
-    if file is not None:
-        df = pd.read_csv(file)
-        st.write("📄 Données importées :", df)
+        st.write("Prix:", prix)
+        st.write("Quantité:", quantite)
+        st.write("Coût:", cout)
 
-        if st.button("Prédire"):
-            predictions = model.predict(df)
-            df["Prediction"] = predictions
-            st.write("📊 Résultats :", df)
-
-# =========================
-# 🟡 MODE 2 : MANUEL
-# =========================
-else:
-    st.subheader("✍️ Saisie des données")
-
-    lag1 = st.number_input("Lag1", value=0.0)
-    lag2 = st.number_input("Lag2", value=0.0)
-
-    input_df = pd.DataFrame([[lag1, lag2]], columns=["Lag1", "Lag2"])
-
-    if st.button("Prédire"):
-        prediction = model.predict(input_df)
-        st.success(f"📈 Résultat : {prediction[0]}")
+    except:
+        st.error("Entre des nombres valides")
